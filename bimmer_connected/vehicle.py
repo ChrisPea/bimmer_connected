@@ -121,6 +121,10 @@ class ConnectedDriveVehicle:
         """Update the state of a vehicle."""
         self.state.update_data()
 
+    def update_vehicle_efficiency_data(self) -> None:
+        """Update the state of a vehicle."""
+        self.state.get_efficiency_data()
+
     @property
     def drive_train(self) -> DriveTrainType:
         """Get the type of drive train of the vehicle."""

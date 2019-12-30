@@ -26,6 +26,11 @@ def main() -> None:
     _add_default_arguments(status_parser)
     _add_position_arguments(status_parser)
 
+    efficiency_parser = subparsers.add_parser('efficiency', description='get current efficiency data of the vehicle')
+    _add_default_arguments(efficiency_parser)
+    _add_position_arguments(efficiency_parser)
+    efficiency_parser.set_defaults(func=get_efficiency)
+
     fingerprint_parser = subparsers.add_parser('fingerprint', description='save a vehicle fingerprint')
     _add_default_arguments(fingerprint_parser)
     _add_position_arguments(fingerprint_parser)
@@ -73,11 +78,31 @@ def get_status(args) -> None:
         ','.join([v.name for v in account.vehicles])))
 
     for vehicle in account.vehicles:
-        print('VIN: {}'.format(vehicle.vin))
+        """print('VIN: {}'.format(vehicle.vin))
         print('mileage: {}'.format(vehicle.state.mileage))
         print('vehicle properties:')
-        print(json.dumps(vehicle.attributes, indent=4))
+        print(json.dumps(vehicle.attributes, indent=4))"""
         print('vehicle status:')
+        print(json.dumps(vehicle.state.attributes, indent=4))
+
+def get_efficiency(args) -> None:
+    """Get the vehicle efficiency status."""
+    account = ConnectedDriveAccount(args.username, args.password, get_region_from_name(args.region))
+    if args.lat and args.lng:
+        for vehicle in account.vehicles:
+            vehicle.set_observer_position(args.lat, args.lng)
+    account.update_vehicle_efficiency_data()
+
+    print('Found {} vehicles: {}'.format(
+        len(account.vehicles),
+        ','.join([v.name for v in account.vehicles])))
+
+    for vehicle in account.vehicles:
+        """print('VIN: {}'.format(vehicle.vin))
+        print('mileage: {}'.format(vehicle.state.mileage))
+        print('vehicle properties:')
+        print(json.dumps(vehicle.attributes, indent=4))"""
+        print('vehicle efficiency status:')
         print(json.dumps(vehicle.state.attributes, indent=4))
 
 

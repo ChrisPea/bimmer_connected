@@ -5,7 +5,7 @@ import logging
 from enum import Enum
 from typing import List
 
-from bimmer_connected.const import VEHICLE_STATUS_URL
+from bimmer_connected.const import VEHICLE_STATUS_URL, EFFICIENCY_URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -114,6 +114,23 @@ class VehicleState:  # pylint: disable=too-many-public-methods
         self._account = account
         self._vehicle = vehicle
         self._attributes = None
+
+    def get_efficiency_data(self) -> None:
+        """Read new status data from the server."""
+        _LOGGER.debug('requesting new efficiency data from connected drive')
+        format_string = '%Y-%m-%dT%H:%M:%S'
+        timestamp = datetime.datetime.now().strftime(format_string)
+        params = {
+            'deviceTime': timestamp,
+            'dlat': self._vehicle.observer_latitude,
+            'dlon': self._vehicle.observer_longitude,
+        }
+        response = self._account.send_request(
+            EFFICIENCY_URL.format(server=self._account.server_url, vin=self._vehicle.vin), logfilename='status',
+            params=params)
+        attributes = response.json()
+        self._attributes = attributes
+        _LOGGER.debug('received new data from connected drive')
 
     def update_data(self) -> None:
         """Read new status data from the server."""
@@ -286,6 +303,7 @@ class VehicleState:  # pylint: disable=too-many-public-methods
         return ParkingLightState(self.attributes['parkingLight'])
 
     @property
+    @backend_parameter
     def are_parking_lights_on(self) -> bool:
         """Get status of parking lights.
 

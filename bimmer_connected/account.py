@@ -227,7 +227,18 @@ class ConnectedDriveAccount:  # pylint: disable=too-many-instance-attributes
         Notify all listeners of the vehicle state update.
         """
         for car in self.vehicles:
+            print(car.name)
             car.update_state()
+        for listener in self._update_listeners:
+            listener()
+
+    def update_vehicle_efficiency_data(self) -> None:
+        """Update the efficiency data of all vehicles.
+
+        Notify all listeners of the vehicle state update.
+        """
+        for car in self.vehicles:
+            car.update_vehicle_efficiency_data()
         for listener in self._update_listeners:
             listener()
 
